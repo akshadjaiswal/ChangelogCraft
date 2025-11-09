@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,29 +21,19 @@ interface ChangelogWithRepository extends Changelog {
   };
 }
 
-interface ChangelogsResponse {
+interface ChangelogListProps {
   changelogs: ChangelogWithRepository[];
-  count: number;
+  isLoading: boolean;
+  error: Error | null;
 }
 
-export function ChangelogList() {
+export function ChangelogList({ changelogs, isLoading, error }: ChangelogListProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data, isLoading, error } = useQuery<ChangelogsResponse>({
-    queryKey: ['changelogs'],
-    queryFn: async () => {
-      const response = await fetch('/api/changelogs');
-      if (!response.ok) {
-        throw new Error('Failed to fetch changelogs');
-      }
-      return response.json();
-    },
-  });
-
-  const filteredChangelogs = data?.changelogs.filter((changelog) =>
+  const filteredChangelogs = changelogs.filter((changelog) =>
     changelog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     changelog.repository.name.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  );
 
   if (error) {
     return (

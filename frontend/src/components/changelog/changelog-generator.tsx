@@ -7,6 +7,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Sparkles, Loader2 } from 'lucide-react';
 import type { DateRangePreset, TemplateType } from '@/types';
 import { TEMPLATE_EXAMPLES } from '@/lib/groq/prompts';
+import { changelogKeys } from '@/hooks/use-changelogs';
 import { toast } from 'sonner';
 
 interface ChangelogGeneratorProps {
@@ -27,6 +29,7 @@ export function ChangelogGenerator({
   repositoryName,
   onGenerate,
 }: ChangelogGeneratorProps) {
+  const queryClient = useQueryClient();
   const [dateRange, setDateRange] = useState<DateRangePreset>('30days');
   const [templateType, setTemplateType] = useState<TemplateType>('detailed');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -60,6 +63,10 @@ export function ChangelogGenerator({
 
       // Call onGenerate with full markdown
       onGenerate(markdown);
+
+      // Invalidate changelogs query to refresh dashboard
+      queryClient.invalidateQueries({ queryKey: changelogKeys.all });
+
       toast.success('Changelog generated successfully!', {
         description: `Generated from ${data.commitCount} commits`,
       });

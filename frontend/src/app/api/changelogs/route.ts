@@ -37,15 +37,16 @@ export async function GET(request: NextRequest) {
       .from('changelogs')
       .select(`
         *,
-        repository:repositories (
+        repository:repositories!inner (
           id,
           name,
           full_name,
           html_url,
-          language
+          language,
+          user_id
         )
       `)
-      .eq('repositories.user_id', user.id)
+      .eq('repository.user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) {

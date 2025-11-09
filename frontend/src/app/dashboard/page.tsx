@@ -10,6 +10,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { useRepositories } from '@/hooks/use-repositories';
+import { useChangelogs } from '@/hooks/use-changelogs';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { StatsOverview } from '@/components/dashboard/stats-overview';
 import { RepositoryList } from '@/components/dashboard/repository-list';
@@ -22,6 +23,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuthStore();
   const { data: repositories, isLoading: reposLoading, error } = useRepositories();
+  const { data: changelogsData, isLoading: changelogsLoading, error: changelogsError } = useChangelogs();
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -38,6 +40,14 @@ export default function DashboardPage() {
       });
     }
   }, [error]);
+
+  useEffect(() => {
+    if (changelogsError) {
+      toast.error('Failed to load changelogs', {
+        description: changelogsError instanceof Error ? changelogsError.message : 'Please try again later',
+      });
+    }
+  }, [changelogsError]);
 
   // Show loading state while checking auth
   if (authLoading) {
@@ -56,7 +66,7 @@ export default function DashboardPage() {
   // Calculate stats
   const stats = {
     totalRepositories: repositories?.length || 0,
-    totalChangelogs: 0, // TODO: Fetch from API
+    totalChangelogs: changelogsData?.count || 0,
     apiUsage: 0, // TODO: Fetch from API
   };
 
@@ -106,7 +116,11 @@ export default function DashboardPage() {
                 </p>
               </div>
 
-              <ChangelogList />
+              <ChangelogList
+                changelogs={changelogsData?.changelogs || []}
+                isLoading={changelogsLoading}
+                error={changelogsError}
+              />
             </TabsContent>
           </Tabs>
         </div>
