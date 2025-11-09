@@ -10,11 +10,11 @@ import { userQueries, repositoryQueries, changelogQueries } from '@/lib/supabase
 import { GroqAPI } from '@/lib/groq/client';
 import { CHANGELOG_SYSTEM_PROMPT, buildChangelogUserPrompt } from '@/lib/groq/prompts';
 import { GitHubAPI, parseFullName, getDateRangePreset } from '@/lib/github/client';
+import { getSession } from '@/lib/auth/session';
 import type { TemplateType, DateRangePreset } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
     const body = await request.json();
 
     const {
@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get current session
-    const { data: { session } } = await supabase.auth.getSession();
+    // Get session from cookie
+    const session = await getSession();
     if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -44,16 +44,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user
-    const githubId = session.user.user_metadata?.github_id;
-    if (!githubId) {
-      return NextResponse.json(
-        { error: 'GitHub ID not found' },
-        { status: 400 }
-      );
-    }
-
-    const user = await userQueries.getByGithubId(supabase, githubId);
+    // Get user from database
+    const supabase = await createClient();
+    const user = await userQueries.getById(supabase, session.userId);
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },

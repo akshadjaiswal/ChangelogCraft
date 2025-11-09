@@ -8,13 +8,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { userQueries } from '@/lib/supabase/queries';
 import { GitHubAPI } from '@/lib/github/client';
+import { getSession } from '@/lib/auth/session';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    // Get current session
-    const { data: { session } } = await supabase.auth.getSession();
+    // Get session from cookie
+    const session = await getSession();
 
     if (!session) {
       return NextResponse.json(
@@ -24,15 +23,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user from database
-    const githubId = session.user.user_metadata?.github_id;
-    if (!githubId) {
-      return NextResponse.json(
-        { error: 'GitHub ID not found' },
-        { status: 400 }
-      );
-    }
+    const supabase = await createClient();
+    const user = await userQueries.getById(supabase, session.userId);
 
-    const user = await userQueries.getByGithubId(supabase, githubId);
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },

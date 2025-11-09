@@ -20,7 +20,7 @@ export function createGroqClient(apiKey?: string) {
  * Groq API Configuration
  */
 export const GROQ_CONFIG = {
-  model: 'llama-3.1-70b-versatile',
+  model: 'openai/gpt-oss-20b',
   temperature: 0.4,
   maxTokens: 2000,
   topP: 1,
