@@ -98,19 +98,57 @@ export async function POST(request: NextRequest) {
       templateType
     );
 
-    // Generate changelog with streaming
+    // Generate changelog (non-streaming for saving to database)
     const groqClient = new GroqAPI();
-    const stream = await groqClient.createStreamingResponse(
+    const markdown = await groqClient.generateChangelogSync(
       CHANGELOG_SYSTEM_PROMPT,
       userPrompt
     );
 
-    // Return streaming response
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+    // Save changelog to database
+    const dbRepository = await repositoryQueries.getByFullName(supabase, repository.full_name);
+    let repoId = dbRepository?.id;
+
+    // If repository not in database, create it
+    if (!dbRepository) {
+      const newRepo = await repositoryQueries.create(supabase, {
+        user_id: user.id,
+        github_repo_id: repository.id,
+        name: repository.name,
+        full_name: repository.full_name,
+        description: repository.description,
+        html_url: repository.html_url,
+        language: repository.language,
+        stars: repository.stargazers_count,
+        is_private: repository.private,
+        default_branch: repository.default_branch,
+      });
+      repoId = newRepo.id;
+    }
+
+    // Save changelog
+    const changelog = await changelogQueries.create(supabase, {
+      repository_id: repoId,
+      title: `Changelog - ${repository.name}`,
+      content: { raw: markdown },
+      markdown: markdown,
+      commit_count: commits.length,
+      date_from: since.toISOString(),
+      date_to: until.toISOString(),
+      template_type: templateType,
+      is_published: true,
+    });
+
+    // Return the generated changelog
+    return NextResponse.json({
+      success: true,
+      changelogId: changelog.id,
+      markdown,
+      commitCount: commits.length,
+      repository: {
+        id: repository.id,
+        name: repository.name,
+        full_name: repository.full_name,
       },
     });
   } catch (error: any) {

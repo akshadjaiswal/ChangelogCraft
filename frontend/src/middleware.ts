@@ -6,7 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { verifySession } from '@/lib/auth/session';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -22,10 +22,20 @@ export async function middleware(request: NextRequest) {
 
   try {
     // Check authentication for protected routes
-    const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    const sessionCookie = request.cookies.get('changelogcraft_session');
 
-    // If no session and trying to access protected route, redirect to home
+    if (!sessionCookie) {
+      // No session cookie, redirect to home
+      if (pathname.startsWith('/dashboard')) {
+        return NextResponse.redirect(new URL('/', request.url));
+      }
+      return NextResponse.next();
+    }
+
+    // Verify session
+    const session = await verifySession(sessionCookie.value);
+
+    // If no valid session and trying to access protected route, redirect to home
     if (!session && pathname.startsWith('/dashboard')) {
       return NextResponse.redirect(new URL('/', request.url));
     }
@@ -33,7 +43,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   } catch (error) {
     console.error('[Middleware] Error:', error);
-    return NextResponse.redirect(new URL('/', request.url));
+    if (pathname.startsWith('/dashboard')) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+    return NextResponse.next();
   }
 }
 

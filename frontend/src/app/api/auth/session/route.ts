@@ -7,26 +7,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { userQueries } from '@/lib/supabase/queries';
+import { getSession } from '@/lib/auth/session';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    // Get session from cookie
+    const session = await getSession();
 
-    // Get current session
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
+    if (!session) {
       return NextResponse.json({ user: null, session: null }, { status: 401 });
     }
 
     // Get user from database
-    const githubId = session.user.user_metadata?.github_id;
-
-    if (!githubId) {
-      return NextResponse.json({ user: null, session: null }, { status: 401 });
-    }
-
-    const user = await userQueries.getByGithubId(supabase, githubId);
+    const supabase = await createClient();
+    const user = await userQueries.getById(supabase, session.userId);
 
     if (!user) {
       return NextResponse.json({ user: null, session: null }, { status: 401 });
@@ -44,7 +38,7 @@ export async function GET(request: NextRequest) {
         updatedAt: user.updated_at,
       },
       session: {
-        expiresAt: session.expires_at,
+        expiresAt: session.expiresAt,
       },
     });
   } catch (error) {

@@ -52,25 +52,17 @@ export function ChangelogGenerator({
         throw new Error(error.error || 'Failed to generate changelog');
       }
 
-      // Read streaming response
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let fullMarkdown = '';
+      const data = await response.json();
+      const markdown = data.markdown;
 
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const text = decoder.decode(value);
-          fullMarkdown += text;
-          setStreamedContent(fullMarkdown);
-        }
-      }
+      // Update streamed content
+      setStreamedContent(markdown);
 
       // Call onGenerate with full markdown
-      onGenerate(fullMarkdown);
-      toast.success('Changelog generated successfully!');
+      onGenerate(markdown);
+      toast.success('Changelog generated successfully!', {
+        description: `Generated from ${data.commitCount} commits`,
+      });
     } catch (error: any) {
       console.error('Generation error:', error);
       toast.error('Failed to generate changelog', {

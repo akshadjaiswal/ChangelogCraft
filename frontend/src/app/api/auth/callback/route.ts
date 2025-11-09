@@ -10,6 +10,7 @@ import { exchangeCodeForToken } from '@/lib/github/oauth';
 import { GitHubAPI } from '@/lib/github/client';
 import { createClient } from '@/lib/supabase/server';
 import { userQueries } from '@/lib/supabase/queries';
+import { createSession, setSessionCookie } from '@/lib/auth/session';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
     const githubClient = new GitHubAPI(accessToken);
     const githubUser = await githubClient.getAuthenticatedUser();
 
-    // Create Supabase client
+    // Create Supabase client (for database only, not auth)
     const supabase = await createClient();
 
     // Upsert user in database
@@ -52,30 +53,15 @@ export async function GET(request: NextRequest) {
       access_token: accessToken,
     });
 
-    // Sign in the user with Supabase auth (create session)
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: `${githubUser.login}@github.changelogcraft.local`,
-      password: accessToken, // Use token as password
+    // Create session token
+    const sessionToken = await createSession({
+      userId: user.id,
+      githubId: user.github_id,
+      username: user.username,
     });
 
-    // If user doesn't exist in Supabase Auth, create them
-    if (signInError && signInError.message.includes('Invalid login credentials')) {
-      const { error: signUpError } = await supabase.auth.signUp({
-        email: `${githubUser.login}@github.changelogcraft.local`,
-        password: accessToken,
-        options: {
-          data: {
-            github_id: githubUser.id,
-            username: githubUser.login,
-            avatar_url: githubUser.avatar_url,
-          },
-        },
-      });
-
-      if (signUpError) {
-        throw signUpError;
-      }
-    }
+    // Set session cookie
+    await setSessionCookie(sessionToken);
 
     // Redirect to dashboard on success
     return NextResponse.redirect(new URL('/dashboard', request.url));

@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, ExternalLink, Star, GitFork, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { formatDate } from '@/lib/utils/date';
+import { toast } from 'sonner';
 
 export default function RepositoryDetailPage() {
   const router = useRouter();
@@ -163,7 +164,7 @@ export default function RepositoryDetailPage() {
                   <Button
                     onClick={() => {
                       navigator.clipboard.writeText(generatedMarkdown);
-                      // TODO: Add toast notification
+                      toast.success('Copied to clipboard!');
                     }}
                     variant="outline"
                   >
@@ -178,6 +179,7 @@ export default function RepositoryDetailPage() {
                       a.download = `CHANGELOG-${repository.name}.md`;
                       a.click();
                       URL.revokeObjectURL(url);
+                      toast.success('Changelog downloaded!');
                     }}
                     variant="outline"
                   >
