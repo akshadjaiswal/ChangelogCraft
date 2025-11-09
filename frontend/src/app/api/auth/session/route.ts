@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const session = await getSession();
 
     if (!session) {
-      return NextResponse.json({ user: null, session: null }, { status: 401 });
+      return NextResponse.json({ user: null, session: null }, { status: 200 });
     }
 
     // Get user from database
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const user = await userQueries.getById(supabase, session.userId);
 
     if (!user) {
-      return NextResponse.json({ user: null, session: null }, { status: 401 });
+      return NextResponse.json({ user: null, session: null }, { status: 200 });
     }
 
     // Return sanitized user data (without access token)
