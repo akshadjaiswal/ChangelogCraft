@@ -13,7 +13,9 @@ import { useRepositories } from '@/hooks/use-repositories';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { StatsOverview } from '@/components/dashboard/stats-overview';
 import { RepositoryList } from '@/components/dashboard/repository-list';
+import { ChangelogList } from '@/components/dashboard/changelog-list';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 
 export default function DashboardPage() {
@@ -75,20 +77,38 @@ export default function DashboardPage() {
           {/* Stats Overview */}
           <StatsOverview stats={stats} isLoading={reposLoading} />
 
-          {/* Repositories Section */}
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight">Your Repositories</h2>
-              <p className="text-sm text-muted-foreground">
-                Select a repository to generate a changelog
-              </p>
-            </div>
+          {/* Tabs for Repositories and Changelogs */}
+          <Tabs defaultValue="repositories" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="repositories">Repositories</TabsTrigger>
+              <TabsTrigger value="changelogs">Generated Changelogs</TabsTrigger>
+            </TabsList>
 
-            <RepositoryList
-              repositories={repositories || []}
-              isLoading={reposLoading}
-            />
-          </div>
+            <TabsContent value="repositories" className="space-y-4">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight">Your Repositories</h2>
+                <p className="text-sm text-muted-foreground">
+                  Select a repository to generate a changelog
+                </p>
+              </div>
+
+              <RepositoryList
+                repositories={repositories || []}
+                isLoading={reposLoading}
+              />
+            </TabsContent>
+
+            <TabsContent value="changelogs" className="space-y-4">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight">Generated Changelogs</h2>
+                <p className="text-sm text-muted-foreground">
+                  View and manage your generated changelogs
+                </p>
+              </div>
+
+              <ChangelogList />
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
     </div>
