@@ -8,13 +8,13 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FolderGit2, FileText, Zap } from 'lucide-react';
+import { FolderGit2, FileText, Eye } from 'lucide-react';
 
 interface StatsOverviewProps {
   stats: {
     totalRepositories: number;
     totalChangelogs: number;
-    apiUsage: number;
+    totalViews: number;
   };
   isLoading?: boolean;
 }
@@ -57,10 +57,10 @@ export function StatsOverview({ stats, isLoading }: StatsOverviewProps) {
       bgColor: 'bg-accent/10',
     },
     {
-      title: 'API Usage',
-      value: stats.apiUsage,
-      description: 'Requests this month',
-      icon: Zap,
+      title: 'Total Views',
+      value: stats.totalViews,
+      description: 'Changelog views',
+      icon: Eye,
       color: 'text-blue-500',
       bgColor: 'bg-blue-500/10',
     },
