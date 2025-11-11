@@ -11,8 +11,9 @@ import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, ExternalLink, Eye, Calendar, Download } from 'lucide-react';
+import { Sparkles, ExternalLink, Eye, Calendar } from 'lucide-react';
 import { formatDate } from '@/lib/utils/date';
+import { ExportButtons } from '@/components/changelog/export-buttons';
 
 // Enable ISR - revalidate every 24 hours
 export const revalidate = 86400;
@@ -38,7 +39,7 @@ async function getChangelog(username: string, repo: string) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { username, repo } = params;
+  const { username, repo } = await params;
 
   return {
     title: `${username}/${repo} - Changelog | ChangelogCraft`,
@@ -52,7 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function PublicChangelogPage({ params }: PageProps) {
-  const { username, repo } = params;
+  const { username, repo } = await params;
   const data = await getChangelog(username, repo);
 
   if (!data) {
@@ -170,31 +171,7 @@ export default async function PublicChangelogPage({ params }: PageProps) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => {
-                    navigator.clipboard.writeText(changelog.markdown);
-                  }}
-                  variant="outline"
-                >
-                  Copy Markdown
-                </Button>
-                <Button
-                  onClick={() => {
-                    const blob = new Blob([changelog.markdown], { type: 'text/markdown' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `CHANGELOG-${repository.name}.md`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                  }}
-                  variant="outline"
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Download CHANGELOG.md
-                </Button>
-              </div>
+              <ExportButtons markdown={changelog.markdown} repositoryName={repository.name} />
             </CardContent>
           </Card>
 

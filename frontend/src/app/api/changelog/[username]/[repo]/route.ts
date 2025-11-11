@@ -13,7 +13,7 @@ export async function GET(
   { params }: { params: { username: string; repo: string } }
 ) {
   try {
-    const { username, repo } = params;
+    const { username, repo } = await params;
     const fullName = `${username}/${repo}`;
 
     console.log('[Public Changelog API] Looking for changelog:', { username, repo, fullName });
