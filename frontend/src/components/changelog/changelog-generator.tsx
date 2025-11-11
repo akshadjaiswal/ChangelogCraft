@@ -197,25 +197,16 @@ export function ChangelogGenerator({
         </CardContent>
       </Card>
 
-      {/* Streaming Preview */}
-      {(isGenerating || streamedContent) && (
+      {/* Generation Status */}
+      {isGenerating && (
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {isGenerating && <Loader2 className="h-5 w-5 animate-spin" />}
-              Generated Changelog
-            </CardTitle>
-            <CardDescription>
-              {isGenerating
-                ? 'AI is generating your changelog...'
-                : 'Changelog generation complete!'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm max-w-none rounded-lg border bg-muted/30 p-4">
-              <pre className="whitespace-pre-wrap font-mono text-sm">
-                {streamedContent || 'Generating...'}
-              </pre>
+          <CardContent className="flex items-center justify-center gap-3 py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <div className="text-center">
+              <p className="font-medium">Generating your changelog...</p>
+              <p className="text-sm text-muted-foreground">
+                This may take a few moments
+              </p>
             </div>
           </CardContent>
         </Card>

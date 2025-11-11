@@ -78,27 +78,77 @@ export class GroqAPI {
 
   /**
    * Generate changelog without streaming (for server-side)
+   * Includes timeout and retry logic
    */
-  async generateChangelogSync(systemPrompt: string, userPrompt: string): Promise<string> {
-    try {
-      const messages: ChatCompletionMessageParam[] = [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ];
+  async generateChangelogSync(
+    systemPrompt: string,
+    userPrompt: string,
+    retries = 2,
+    timeoutMs = 30000
+  ): Promise<string> {
+    let lastError: any;
 
-      const completion = await this.client.chat.completions.create({
-        messages,
-        model: GROQ_CONFIG.model,
-        temperature: GROQ_CONFIG.temperature,
-        max_tokens: GROQ_CONFIG.maxTokens,
-        top_p: GROQ_CONFIG.topP,
-        stream: false,
-      });
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        console.log(`[GroqAPI] Generation attempt ${attempt + 1}/${retries + 1}`);
 
-      return completion.choices[0]?.message?.content || '';
-    } catch (error) {
-      throw this.handleError(error);
+        const messages: ChatCompletionMessageParam[] = [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ];
+
+        // Create a promise that will timeout
+        const completionPromise = this.client.chat.completions.create({
+          messages,
+          model: GROQ_CONFIG.model,
+          temperature: GROQ_CONFIG.temperature,
+          max_tokens: GROQ_CONFIG.maxTokens,
+          top_p: GROQ_CONFIG.topP,
+          stream: false,
+        });
+
+        // Race between completion and timeout
+        const completion = await Promise.race([
+          completionPromise,
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('Request timeout')), timeoutMs)
+          ),
+        ]);
+
+        const content = completion.choices[0]?.message?.content || '';
+
+        // Validate that we got meaningful content
+        if (!content || content.trim().length === 0) {
+          throw new Error('AI returned empty response');
+        }
+
+        // Validate that content looks like markdown
+        if (content.length < 50) {
+          throw new Error('AI response too short, likely failed');
+        }
+
+        console.log(`[GroqAPI] Generation successful, content length: ${content.length}`);
+        return content;
+      } catch (error: any) {
+        lastError = error;
+        console.error(`[GroqAPI] Attempt ${attempt + 1} failed:`, error.message);
+
+        // Don't retry on auth errors or user errors
+        if (error?.status === 401 || error?.status === 400) {
+          throw this.handleError(error);
+        }
+
+        // Wait before retry (exponential backoff)
+        if (attempt < retries) {
+          const waitMs = Math.min(1000 * Math.pow(2, attempt), 5000);
+          console.log(`[GroqAPI] Waiting ${waitMs}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, waitMs));
+        }
+      }
     }
+
+    // All retries failed
+    throw this.handleError(lastError);
   }
 
   /**
@@ -166,6 +216,18 @@ export class GroqAPI {
    */
   private handleError(error: any): Error {
     console.error('[GroqAPI Error]', error);
+
+    if (error?.message === 'Request timeout') {
+      return new Error('AI generation took too long. Try reducing the date range or number of commits.');
+    }
+
+    if (error?.message === 'AI returned empty response') {
+      return new Error('AI failed to generate changelog. Please try again.');
+    }
+
+    if (error?.message === 'AI response too short, likely failed') {
+      return new Error('AI generated incomplete changelog. Please try again.');
+    }
 
     if (error?.status === 401) {
       return new Error('Invalid Groq API key. Please check your configuration.');

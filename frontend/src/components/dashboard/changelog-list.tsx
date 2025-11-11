@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ExternalLink, FileText, Calendar, GitCommit, Eye, Search } from 'lucide-react';
+import { ExternalLink, FileText, Calendar, GitCommit, Eye, Search, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { toast } from 'sonner';
 import type { Changelog } from '@/types';
 
 interface ChangelogWithRepository extends Changelog {
@@ -28,7 +30,19 @@ interface ChangelogListProps {
 }
 
 export function ChangelogList({ changelogs, isLoading, error }: ChangelogListProps) {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [loadingChangelogId, setLoadingChangelogId] = useState<string | null>(null);
+
+  const handleViewChangelog = (changelog: ChangelogWithRepository) => {
+    const username = changelog.repository.full_name.split('/')[0];
+    const repoName = changelog.repository.full_name.split('/')[1];
+    const url = `/changelog/${username}/${repoName}/${changelog.id}`;
+
+    setLoadingChangelogId(changelog.id);
+    toast.loading('Loading changelog...', { id: `loading-${changelog.id}` });
+    router.push(url);
+  };
 
   const filteredChangelogs = changelogs.filter((changelog) =>
     changelog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -133,11 +147,24 @@ export function ChangelogList({ changelogs, isLoading, error }: ChangelogListPro
                 </div>
 
                 <div className="flex gap-2 pt-2">
-                  <Button asChild variant="default" size="sm" className="flex-1">
-                    <Link href={`/changelog/${changelog.repository.full_name.split('/')[0]}/${changelog.repository.full_name.split('/')[1]}/${changelog.id}`}>
-                      <Eye className="h-3 w-3 mr-1" />
-                      View
-                    </Link>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => handleViewChangelog(changelog)}
+                    disabled={loadingChangelogId === changelog.id}
+                  >
+                    {loadingChangelogId === changelog.id ? (
+                      <>
+                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="h-3 w-3 mr-1" />
+                        View
+                      </>
+                    )}
                   </Button>
                   <Button asChild variant="outline" size="sm">
                     <a

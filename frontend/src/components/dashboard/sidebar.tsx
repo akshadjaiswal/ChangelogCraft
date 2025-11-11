@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Sparkles,
   Github,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
@@ -53,12 +54,23 @@ const navItems: NavItem[] = [
   },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  onCollapseChange?: (collapsed: boolean) => void;
+}
+
+export function Sidebar({ onCollapseChange }: SidebarProps = {}) {
   const pathname = usePathname();
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Notify parent of collapse state changes
+  useEffect(() => {
+    if (onCollapseChange) {
+      onCollapseChange(collapsed);
+    }
+  }, [collapsed, onCollapseChange]);
 
   // Detect mobile screen size
   useEffect(() => {
@@ -178,6 +190,21 @@ export function Sidebar() {
                 </div>
               )}
             </div>
+
+            {/* Logout Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={logout}
+              className={cn(
+                'mt-2 w-full justify-start gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive',
+                collapsed && 'justify-center px-2'
+              )}
+              title={collapsed ? 'Logout' : undefined}
+            >
+              <LogOut className="size-4" />
+              {!collapsed && <span>Logout</span>}
+            </Button>
           </div>
         )}
 

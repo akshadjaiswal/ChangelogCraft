@@ -118,18 +118,15 @@ export default function SettingsPage() {
             <Separator />
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Account Information</Label>
-              <div className="grid gap-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">User ID</span>
-                  <span className="font-mono text-xs">{user?.id}</span>
-                </div>
-                {user?.githubId && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">GitHub ID</span>
-                    <span className="font-mono text-xs">{user.githubId}</span>
-                  </div>
-                )}
+              <Label className="text-sm font-medium">Account Type</Label>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="gap-1">
+                  <Github className="size-3" />
+                  GitHub Account
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  Connected via OAuth
+                </span>
               </div>
             </div>
           </CardContent>

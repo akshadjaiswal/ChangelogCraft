@@ -158,7 +158,7 @@ export default async function ChangelogByIdPage({ params }: PageProps) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="prose prose-slate dark:prose-invert max-w-none">
+              <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:leading-relaxed prose-li:leading-relaxed prose-strong:font-semibold prose-code:text-blue-600 prose-code:bg-blue-50 dark:prose-code:bg-blue-950 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {changelog.markdown}
                 </ReactMarkdown>
