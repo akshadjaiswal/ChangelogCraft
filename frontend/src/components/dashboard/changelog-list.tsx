@@ -99,35 +99,42 @@ export function ChangelogList({ changelogs, isLoading, error }: ChangelogListPro
                       {changelog.repository.name}
                     </CardDescription>
                   </div>
-                  {changelog.repository.language && (
-                    <Badge variant="outline" className="ml-2 shrink-0 text-xs">
-                      {changelog.repository.language}
-                    </Badge>
-                  )}
+                  <div className="flex gap-1 ml-2 shrink-0">
+                    {changelog.templateType && (
+                      <Badge variant="secondary" className="text-xs">
+                        {changelog.templateType}
+                      </Badge>
+                    )}
+                    {changelog.repository.language && (
+                      <Badge variant="outline" className="text-xs">
+                        {changelog.repository.language}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center gap-4 text-xs text-gray-500">
                   <div className="flex items-center gap-1">
                     <GitCommit className="h-3 w-3" />
-                    <span>{changelog.commit_count} commits</span>
+                    <span>{changelog.commitCount} commits</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Eye className="h-3 w-3" />
-                    <span>{changelog.view_count} views</span>
+                    <span>{changelog.viewCount} views</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-1 text-xs text-gray-500">
                   <Calendar className="h-3 w-3" />
                   <span>
-                    {formatDistanceToNow(new Date(changelog.created_at), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(changelog.createdAt), { addSuffix: true })}
                   </span>
                 </div>
 
                 <div className="flex gap-2 pt-2">
                   <Button asChild variant="default" size="sm" className="flex-1">
-                    <Link href={`/changelog/${changelog.repository.full_name.split('/')[0]}/${changelog.repository.full_name.split('/')[1]}`}>
+                    <Link href={`/changelog/${changelog.repository.full_name.split('/')[0]}/${changelog.repository.full_name.split('/')[1]}/${changelog.id}`}>
                       <Eye className="h-3 w-3 mr-1" />
                       View
                     </Link>

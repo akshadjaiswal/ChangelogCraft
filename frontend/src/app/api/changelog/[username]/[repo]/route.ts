@@ -10,7 +10,7 @@ import { changelogQueries, repositoryQueries } from '@/lib/supabase/queries';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { username: string; repo: string } }
+  { params }: { params: Promise<{ username: string; repo: string }> }
 ) {
   try {
     const { username, repo } = await params;
@@ -32,7 +32,7 @@ export async function GET(
       const { data: repositories } = await supabase
         .from('repositories')
         .select('*')
-        .ilike('full_name', fullName);
+        .ilike('full_name', fullName) as { data: any[] | null; error: any };
 
       if (repositories && repositories.length > 0) {
         console.log('[Public Changelog API] Found repository with case mismatch:', repositories[0].full_name);

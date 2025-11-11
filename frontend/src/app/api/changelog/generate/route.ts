@@ -132,6 +132,10 @@ export async function POST(request: NextRequest) {
 
     console.log('[Changelog Generation] Creating changelog with repository_id:', repoId);
 
+    if (!repoId) {
+      throw new Error('Failed to get or create repository');
+    }
+
     // Save changelog
     const changelog = await changelogQueries.create(supabase, {
       repository_id: repoId,

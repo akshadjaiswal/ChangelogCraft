@@ -12,9 +12,10 @@ import { getSession } from '@/lib/auth/session';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const searchParams = request.nextUrl.searchParams;
 
     // Get date range from query params
@@ -45,7 +46,7 @@ export async function GET(
     // Fetch repository from GitHub
     const githubClient = new GitHubAPI(user.access_token);
     const repositories = await githubClient.getUserRepositories();
-    const repository = repositories.find(r => r.id.toString() === params.id);
+    const repository = repositories.find(r => r.id.toString() === id);
 
     if (!repository) {
       return NextResponse.json(
