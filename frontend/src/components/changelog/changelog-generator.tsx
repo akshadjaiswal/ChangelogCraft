@@ -52,7 +52,32 @@ export function ChangelogGenerator({
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to generate changelog');
+
+        // Handle specific error cases
+        if (error.error === 'No commits found in the specified date range') {
+          toast.error('No commits found', {
+            description: `No commits were found in the selected date range (${dateRange}). Try selecting a longer time period.`,
+            action: {
+              label: 'Change Range',
+              onClick: () => {
+                // Suggest longer date range
+                if (dateRange === '7days') {
+                  setDateRange('30days');
+                } else if (dateRange === '30days') {
+                  setDateRange('90days');
+                }
+              },
+            },
+          });
+        } else {
+          toast.error('Failed to generate changelog', {
+            description: error.error || 'An unexpected error occurred',
+          });
+        }
+
+        setStreamedContent('');
+        setIsGenerating(false);
+        return;
       }
 
       const data = await response.json();
@@ -72,9 +97,22 @@ export function ChangelogGenerator({
       });
     } catch (error: any) {
       console.error('Generation error:', error);
+
+      // Handle network errors or other unexpected errors
+      const errorMessage = error.message || 'An unexpected error occurred';
+      let description = errorMessage;
+
+      if (errorMessage.includes('fetch')) {
+        description = 'Network error. Please check your connection and try again.';
+      } else if (errorMessage.includes('timeout')) {
+        description = 'Request timed out. The repository might be too large. Try a shorter date range.';
+      }
+
       toast.error('Failed to generate changelog', {
-        description: error.message,
+        description,
       });
+
+      setStreamedContent('');
     } finally {
       setIsGenerating(false);
     }
@@ -159,25 +197,16 @@ export function ChangelogGenerator({
         </CardContent>
       </Card>
 
-      {/* Streaming Preview */}
-      {(isGenerating || streamedContent) && (
+      {/* Generation Status */}
+      {isGenerating && (
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {isGenerating && <Loader2 className="h-5 w-5 animate-spin" />}
-              Generated Changelog
-            </CardTitle>
-            <CardDescription>
-              {isGenerating
-                ? 'AI is generating your changelog...'
-                : 'Changelog generation complete!'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm max-w-none rounded-lg border bg-muted/30 p-4">
-              <pre className="whitespace-pre-wrap font-mono text-sm">
-                {streamedContent || 'Generating...'}
-              </pre>
+          <CardContent className="flex items-center justify-center gap-3 py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <div className="text-center">
+              <p className="font-medium">Generating your changelog...</p>
+              <p className="text-sm text-muted-foreground">
+                This may take a few moments
+              </p>
             </div>
           </CardContent>
         </Card>
