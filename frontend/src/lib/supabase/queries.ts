@@ -17,7 +17,7 @@ export const userQueries = {
   /**
    * Get user by ID
    */
-  async getById(client: DbClient, userId: string) {
+  async getById(client: DbClient, userId: string): Promise<Database['public']['Tables']['users']['Row']> {
     const { data, error } = await client
       .from('users')
       .select('*')
@@ -31,7 +31,7 @@ export const userQueries = {
   /**
    * Get user by GitHub ID
    */
-  async getByGithubId(client: DbClient, githubId: number) {
+  async getByGithubId(client: DbClient, githubId: number): Promise<Database['public']['Tables']['users']['Row'] | null> {
     const { data, error } = await client
       .from('users')
       .select('*')
@@ -45,10 +45,10 @@ export const userQueries = {
   /**
    * Create or update user
    */
-  async upsert(client: DbClient, user: Database['public']['Tables']['users']['Insert']) {
-    const { data, error } = await client
+  async upsert(client: DbClient, user: Database['public']['Tables']['users']['Insert']): Promise<Database['public']['Tables']['users']['Row']> {
+    const { data, error} = await client
       .from('users')
-      .upsert(user, { onConflict: 'github_id' })
+      .upsert(user as any, { onConflict: 'github_id' })
       .select()
       .single();
 
@@ -59,8 +59,8 @@ export const userQueries = {
   /**
    * Update user
    */
-  async update(client: DbClient, userId: string, updates: Database['public']['Tables']['users']['Update']) {
-    const { data, error } = await client
+  async update(client: DbClient, userId: string, updates: Database['public']['Tables']['users']['Update']): Promise<Database['public']['Tables']['users']['Row']> {
+    const { data, error } = await (client as any)
       .from('users')
       .update(updates)
       .eq('id', userId)
@@ -80,7 +80,7 @@ export const repositoryQueries = {
   /**
    * Get all repositories for a user
    */
-  async getAllByUserId(client: DbClient, userId: string) {
+  async getAllByUserId(client: DbClient, userId: string): Promise<Database['public']['Tables']['repositories']['Row'][]> {
     const { data, error } = await client
       .from('repositories')
       .select('*')
@@ -94,7 +94,7 @@ export const repositoryQueries = {
   /**
    * Get repository by ID
    */
-  async getById(client: DbClient, repositoryId: string) {
+  async getById(client: DbClient, repositoryId: string): Promise<Database['public']['Tables']['repositories']['Row']> {
     const { data, error } = await client
       .from('repositories')
       .select('*')
@@ -108,7 +108,7 @@ export const repositoryQueries = {
   /**
    * Get repository by full name (owner/repo)
    */
-  async getByFullName(client: DbClient, fullName: string) {
+  async getByFullName(client: DbClient, fullName: string): Promise<Database['public']['Tables']['repositories']['Row'] | null> {
     const { data, error } = await client
       .from('repositories')
       .select('*')
@@ -122,10 +122,10 @@ export const repositoryQueries = {
   /**
    * Create repository
    */
-  async create(client: DbClient, repository: Database['public']['Tables']['repositories']['Insert']) {
+  async create(client: DbClient, repository: Database['public']['Tables']['repositories']['Insert']): Promise<Database['public']['Tables']['repositories']['Row']> {
     const { data, error } = await client
       .from('repositories')
-      .insert(repository)
+      .insert(repository as any)
       .select()
       .single();
 
@@ -136,8 +136,8 @@ export const repositoryQueries = {
   /**
    * Update repository
    */
-  async update(client: DbClient, repositoryId: string, updates: Database['public']['Tables']['repositories']['Update']) {
-    const { data, error } = await client
+  async update(client: DbClient, repositoryId: string, updates: Database['public']['Tables']['repositories']['Update']): Promise<Database['public']['Tables']['repositories']['Row']> {
+    const { data, error } = await (client as any)
       .from('repositories')
       .update(updates)
       .eq('id', repositoryId)
@@ -151,7 +151,7 @@ export const repositoryQueries = {
   /**
    * Delete repository
    */
-  async delete(client: DbClient, repositoryId: string) {
+  async delete(client: DbClient, repositoryId: string): Promise<void> {
     const { error } = await client
       .from('repositories')
       .delete()
@@ -169,7 +169,7 @@ export const changelogQueries = {
   /**
    * Get changelogs for a repository
    */
-  async getByRepositoryId(client: DbClient, repositoryId: string) {
+  async getByRepositoryId(client: DbClient, repositoryId: string): Promise<Database['public']['Tables']['changelogs']['Row'][]> {
     const { data, error } = await client
       .from('changelogs')
       .select('*')
@@ -183,7 +183,7 @@ export const changelogQueries = {
   /**
    * Get latest changelog for a repository
    */
-  async getLatestByRepositoryId(client: DbClient, repositoryId: string) {
+  async getLatestByRepositoryId(client: DbClient, repositoryId: string): Promise<Database['public']['Tables']['changelogs']['Row'] | null> {
     const { data, error } = await client
       .from('changelogs')
       .select('*')
@@ -200,7 +200,7 @@ export const changelogQueries = {
   /**
    * Get public changelog by repository full name
    */
-  async getPublicByFullName(client: DbClient, fullName: string) {
+  async getPublicByFullName(client: DbClient, fullName: string): Promise<any | null> {
     const { data, error } = await client
       .from('changelogs')
       .select(`
@@ -228,10 +228,10 @@ export const changelogQueries = {
   /**
    * Create changelog
    */
-  async create(client: DbClient, changelog: Database['public']['Tables']['changelogs']['Insert']) {
+  async create(client: DbClient, changelog: Database['public']['Tables']['changelogs']['Insert']): Promise<Database['public']['Tables']['changelogs']['Row']> {
     const { data, error } = await client
       .from('changelogs')
-      .insert(changelog)
+      .insert(changelog as any)
       .select()
       .single();
 
@@ -242,8 +242,8 @@ export const changelogQueries = {
   /**
    * Update changelog
    */
-  async update(client: DbClient, changelogId: string, updates: Database['public']['Tables']['changelogs']['Update']) {
-    const { data, error } = await client
+  async update(client: DbClient, changelogId: string, updates: Database['public']['Tables']['changelogs']['Update']): Promise<Database['public']['Tables']['changelogs']['Row']> {
+    const { data, error } = await (client as any)
       .from('changelogs')
       .update(updates)
       .eq('id', changelogId)
@@ -257,8 +257,8 @@ export const changelogQueries = {
   /**
    * Increment view count
    */
-  async incrementViewCount(client: DbClient, changelogId: string) {
-    const { error } = await client.rpc('increment_changelog_views', { changelog_id: changelogId });
+  async incrementViewCount(client: DbClient, changelogId: string): Promise<void> {
+    const { error } = await client.rpc('increment_changelog_views', { changelog_id: changelogId } as any);
     if (error) throw error;
   },
 };
@@ -271,7 +271,7 @@ export const commitCacheQueries = {
   /**
    * Get cached commits for a repository
    */
-  async getByRepositoryId(client: DbClient, repositoryId: string, since?: Date, until?: Date) {
+  async getByRepositoryId(client: DbClient, repositoryId: string, since?: Date, until?: Date): Promise<Database['public']['Tables']['commits_cache']['Row'][]> {
     let query = client
       .from('commits_cache')
       .select('*')
@@ -293,10 +293,10 @@ export const commitCacheQueries = {
   /**
    * Bulk insert commits (upsert)
    */
-  async bulkUpsert(client: DbClient, commits: Database['public']['Tables']['commits_cache']['Insert'][]) {
+  async bulkUpsert(client: DbClient, commits: Database['public']['Tables']['commits_cache']['Insert'][]): Promise<Database['public']['Tables']['commits_cache']['Row'][]> {
     const { data, error } = await client
       .from('commits_cache')
-      .upsert(commits, { onConflict: 'repository_id,sha' })
+      .upsert(commits as any, { onConflict: 'repository_id,sha' })
       .select();
 
     if (error) throw error;
@@ -311,8 +311,8 @@ export const commitCacheQueries = {
     commitId: string,
     category: string,
     aiSummary: string
-  ) {
-    const { data, error } = await client
+  ): Promise<Database['public']['Tables']['commits_cache']['Row']> {
+    const { data, error } = await (client as any)
       .from('commits_cache')
       .update({
         category,
@@ -339,10 +339,10 @@ export const apiUsageQueries = {
   async log(
     client: DbClient,
     usage: Database['public']['Tables']['api_usage']['Insert']
-  ) {
+  ): Promise<Database['public']['Tables']['api_usage']['Row']> {
     const { data, error } = await client
       .from('api_usage')
-      .insert(usage)
+      .insert(usage as any)
       .select()
       .single();
 
@@ -353,7 +353,7 @@ export const apiUsageQueries = {
   /**
    * Get usage stats for a user
    */
-  async getStatsByUserId(client: DbClient, userId: string, days: number = 30) {
+  async getStatsByUserId(client: DbClient, userId: string, days: number = 30): Promise<Array<{endpoint: string | null, request_type: string | null, tokens_used: number | null}>> {
     const since = new Date();
     since.setDate(since.getDate() - days);
 
@@ -370,7 +370,7 @@ export const apiUsageQueries = {
   /**
    * Get total usage count by endpoint
    */
-  async getCountByEndpoint(client: DbClient, userId: string, endpoint: string, days: number = 30) {
+  async getCountByEndpoint(client: DbClient, userId: string, endpoint: string, days: number = 30): Promise<number> {
     const since = new Date();
     since.setDate(since.getDate() - days);
 

@@ -57,9 +57,34 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Transform snake_case to camelCase for frontend
+    const transformedChangelogs = (changelogs || []).map((changelog: any) => ({
+      id: changelog.id,
+      repositoryId: changelog.repository_id,
+      version: changelog.version,
+      title: changelog.title,
+      content: changelog.content,
+      markdown: changelog.markdown,
+      commitCount: changelog.commit_count,
+      dateFrom: changelog.date_from,
+      dateTo: changelog.date_to,
+      templateType: changelog.template_type,
+      isPublished: changelog.is_published,
+      viewCount: changelog.view_count,
+      generatedAt: changelog.generated_at,
+      createdAt: changelog.created_at,
+      repository: {
+        id: changelog.repository.id,
+        name: changelog.repository.name,
+        full_name: changelog.repository.full_name,
+        html_url: changelog.repository.html_url,
+        language: changelog.repository.language,
+      },
+    }));
+
     return NextResponse.json({
-      changelogs: changelogs || [],
-      count: changelogs?.length || 0,
+      changelogs: transformedChangelogs,
+      count: transformedChangelogs.length,
     });
   } catch (error: any) {
     console.error('[Changelogs API] Error:', error);

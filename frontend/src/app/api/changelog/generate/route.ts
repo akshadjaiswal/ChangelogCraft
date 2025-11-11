@@ -99,11 +99,21 @@ export async function POST(request: NextRequest) {
     );
 
     // Save changelog to database
+    console.log('[Changelog Generation] Looking for repository in DB:', repository.full_name);
     const dbRepository = await repositoryQueries.getByFullName(supabase, repository.full_name);
     let repoId = dbRepository?.id;
 
+    console.log('[Changelog Generation] Repository lookup result:', dbRepository ? `Found (ID: ${dbRepository.id})` : 'Not found, will create');
+
     // If repository not in database, create it
     if (!dbRepository) {
+      console.log('[Changelog Generation] Creating new repository:', {
+        full_name: repository.full_name,
+        name: repository.name,
+        github_repo_id: repository.id,
+        user_id: user.id,
+      });
+
       const newRepo = await repositoryQueries.create(supabase, {
         user_id: user.id,
         github_repo_id: repository.id,
@@ -117,6 +127,13 @@ export async function POST(request: NextRequest) {
         default_branch: repository.default_branch,
       });
       repoId = newRepo.id;
+      console.log('[Changelog Generation] Repository created successfully:', newRepo.id);
+    }
+
+    console.log('[Changelog Generation] Creating changelog with repository_id:', repoId);
+
+    if (!repoId) {
+      throw new Error('Failed to get or create repository');
     }
 
     // Save changelog
@@ -131,6 +148,8 @@ export async function POST(request: NextRequest) {
       template_type: templateType,
       is_published: true,
     });
+
+    console.log('[Changelog Generation] Changelog created successfully:', changelog.id);
 
     // Return the generated changelog
     return NextResponse.json({

@@ -1,7 +1,7 @@
 /**
- * Public Changelog Page
+ * Public Changelog Page by ID
  *
- * Publicly accessible changelog page with ISR.
+ * Publicly accessible changelog page for a specific changelog version.
  */
 
 import { Metadata } from 'next';
@@ -22,12 +22,13 @@ interface PageProps {
   params: {
     username: string;
     repo: string;
+    id: string;
   };
 }
 
-async function getChangelog(username: string, repo: string) {
+async function getChangelogById(changelogId: string) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-  const res = await fetch(`${baseUrl}/api/changelog/${username}/${repo}`, {
+  const res = await fetch(`${baseUrl}/api/changelog/id/${changelogId}`, {
     next: { revalidate: 86400 }, // 24 hours
   });
 
@@ -43,7 +44,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: `${username}/${repo} - Changelog | ChangelogCraft`,
-    description: `View the latest changelog for ${username}/${repo}`,
+    description: `View changelog for ${username}/${repo}`,
     openGraph: {
       title: `${username}/${repo} - Changelog`,
       description: `AI-generated changelog for ${username}/${repo}`,
@@ -52,9 +53,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function PublicChangelogPage({ params }: PageProps) {
-  const { username, repo } = await params;
-  const data = await getChangelog(username, repo);
+export default async function ChangelogByIdPage({ params }: PageProps) {
+  const { username, repo, id } = await params;
+  const data = await getChangelogById(id);
 
   if (!data) {
     return (
@@ -131,6 +132,9 @@ export default async function PublicChangelogPage({ params }: PageProps) {
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 {repository.language && (
                   <Badge variant="secondary">{repository.language}</Badge>
+                )}
+                {changelog.templateType && (
+                  <Badge variant="outline">{changelog.templateType}</Badge>
                 )}
                 <div className="flex items-center gap-1">
                   <Eye className="h-4 w-4" />
