@@ -237,7 +237,7 @@ export function Sidebar({ onCollapseChange }: SidebarProps = {}) {
       <Button
         variant="outline"
         size="icon"
-        className="fixed left-4 top-4 z-40 lg:hidden"
+        className="fixed left-4 top-4 z-[60] bg-background shadow-md lg:hidden"
         onClick={() => setMobileOpen(!mobileOpen)}
         aria-label="Toggle navigation menu"
       >
