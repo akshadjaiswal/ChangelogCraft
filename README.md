@@ -360,8 +360,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 **Akshad**
 
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Twitter: [@yourhandle](https://twitter.com/yourhandle)
+- GitHub: [@akshadjaiswal](https://github.com/akshadjaiswal)
+- Twitter: [@akshad_999](https://twitter.com/akshad_999)
 
 ---
 
@@ -379,8 +379,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ## 📞 Support
 
 If you have any questions or need help, please:
-- Open an [Issue](https://github.com/yourusername/changelogcraft/issues)
-- Start a [Discussion](https://github.com/yourusername/changelogcraft/discussions)
+- Open an [Issue](https://github.com/akshadjaiswal/ChangelogCraft/issues)
+- Start a [Discussion](https://github.com/akshadjaiswal/ChangelogCraft/discussions)
 
 ---
 
@@ -388,6 +388,6 @@ If you have any questions or need help, please:
 
 **Made with ❤️ using AI-powered changelog generation**
 
-[⭐ Star this repo](https://github.com/yourusername/changelogcraft) | [🐛 Report Bug](https://github.com/yourusername/changelogcraft/issues) | [✨ Request Feature](https://github.com/yourusername/changelogcraft/issues)
+[⭐ Star this repo](https://github.com/akshadjaiswal/ChangelogCraft/) | [🐛 Report Bug](https://github.com/akshadjaiswal/ChangelogCraft/issues) | [✨ Request Feature](https://github.com/akshadjaiswal/ChangelogCraft/issues)
 
 </div>
