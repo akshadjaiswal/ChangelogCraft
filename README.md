@@ -72,7 +72,7 @@
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/changelogcraft.git
+   git clone https://github.com/akshadjaiswal/changelogcraft.git
    cd changelogcraft/frontend
    ```
 
