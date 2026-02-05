@@ -238,38 +238,6 @@ Display with preview/raw tabs
 Generate public shareable link
 ```
 
-### Database Schema
-
-**Users Table**
-- `id` (uuid, primary key)
-- `github_id` (text, unique)
-- `username` (text)
-- `email` (text)
-- `avatar_url` (text)
-- `created_at`, `updated_at` (timestamp)
-
-**Repositories Table**
-- `id` (uuid, primary key)
-- `user_id` (uuid, foreign key → users)
-- `github_id` (text, unique)
-- `name`, `full_name` (text)
-- `description`, `language` (text, nullable)
-- `html_url` (text)
-- `created_at`, `updated_at` (timestamp)
-
-**Changelogs Table**
-- `id` (uuid, primary key)
-- `repository_id` (uuid, foreign key → repositories)
-- `title` (text)
-- `markdown` (text)
-- `date_from`, `date_to` (date)
-- `commit_count` (integer)
-- `template_type` (text)
-- `view_count` (integer, default 0)
-- `generated_at` (timestamp)
-
----
-
 ## 🔧 Environment Setup
 
 ### 1. GitHub OAuth Setup
