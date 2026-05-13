@@ -49,7 +49,8 @@ export async function GET(
     console.log('[Changelog by ID API] Changelog found:', changelog.id);
 
     // Increment view count (service_role needed — anon has no UPDATE without is_published check)
-    const { error: updateError } = await createServiceRoleClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: updateError } = await (createServiceRoleClient() as any)
       .from('changelogs')
       .update({ view_count: changelog.view_count + 1 })
       .eq('id', id);
