@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 import { userQueries, repositoryQueries, changelogQueries } from '@/lib/supabase/queries';
 import { GroqAPI } from '@/lib/groq/client';
 import { CHANGELOG_SYSTEM_PROMPT, buildChangelogUserPrompt } from '@/lib/groq/prompts';
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user from database
-    const supabase = await createClient();
+    const supabase = createServiceRoleClient();
     const user = await userQueries.getById(supabase, session.userId);
     if (!user) {
       return NextResponse.json(

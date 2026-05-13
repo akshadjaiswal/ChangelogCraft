@@ -8,7 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { exchangeCodeForToken } from '@/lib/github/oauth';
 import { GitHubAPI } from '@/lib/github/client';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 import { userQueries } from '@/lib/supabase/queries';
 import { createSession, setSessionCookie } from '@/lib/auth/session';
 
@@ -41,8 +41,8 @@ export async function GET(request: NextRequest) {
     const githubClient = new GitHubAPI(accessToken);
     const githubUser = await githubClient.getAuthenticatedUser();
 
-    // Create Supabase client (for database only, not auth)
-    const supabase = await createClient();
+    // Create Supabase client (service role — custom JWT, not Supabase Auth)
+    const supabase = createServiceRoleClient();
 
     // Upsert user in database
     const user = await userQueries.upsert(supabase, {

@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 import { userQueries, changelogQueries } from '@/lib/supabase/queries';
 import { getSession } from '@/lib/auth/session';
 
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user from database
-    const supabase = await createClient();
+    const supabase = createServiceRoleClient();
     const user = await userQueries.getById(supabase, session.userId);
 
     if (!user) {

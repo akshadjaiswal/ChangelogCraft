@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 import { userQueries } from '@/lib/supabase/queries';
 import { GitHubAPI, parseFullName, getDateRangePreset } from '@/lib/github/client';
 import { getSession } from '@/lib/auth/session';
@@ -33,7 +33,7 @@ export async function GET(
     }
 
     // Get user from database
-    const supabase = await createClient();
+    const supabase = createServiceRoleClient();
     const user = await userQueries.getById(supabase, session.userId);
 
     if (!user) {

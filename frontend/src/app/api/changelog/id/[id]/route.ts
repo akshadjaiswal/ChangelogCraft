@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
 
 export async function GET(
   request: NextRequest,
@@ -48,8 +48,8 @@ export async function GET(
 
     console.log('[Changelog by ID API] Changelog found:', changelog.id);
 
-    // Increment view count
-    const { error: updateError } = await (supabase as any)
+    // Increment view count (service_role needed — anon has no UPDATE without is_published check)
+    const { error: updateError } = await createServiceRoleClient()
       .from('changelogs')
       .update({ view_count: changelog.view_count + 1 })
       .eq('id', id);
